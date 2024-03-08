@@ -1,0 +1,43 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Tests
+        run: pytest
+
+      - name: Build
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Build steps for production environment"
+          # Add any additional build steps here for production
+
+      - name: Deploy to Staging
+        if: github.ref == 'refs/heads/staging'
+        run: |
+          echo "Deploying to staging environment"
+          # Add deployment steps for staging environment
+
+      - name: Deploy to Production
+        if: github.event_name == 'release' && contains(github.ref, 'refs/tags/')
+        run: |
+          echo "Deploying to production environment"
+          # Add deployment steps for production environment
